@@ -1,0 +1,16 @@
+{
+  "placeholderImages": [
+    {
+      "id": "ritual-1",
+      "description": "Abstract occult machinery",
+      "imageUrl": "https://picsum.photos/seed/ritual1/600/400",
+      "imageHint": "occult ritual machine"
+    },
+    {
+      "id": "entity-1",
+      "description": "Dark entity profile",
+      "imageUrl": "https://picsum.photos/seed/entity1/400/400",
+      "imageHint": "demon shadow portrait"
+    }
+  ]
+}
