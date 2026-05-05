@@ -1,25 +1,32 @@
 "use client";
 
-import { MessageSquare, Users, Skull, Search, Bell, Home, GitBranch, ShieldAlert, Flame, Loader2 } from "lucide-react";
+import { MessageSquare, Users, Skull, Search, Bell, Home, GitBranch, ShieldAlert, Flame, Loader2, Menu, Volume2, VolumeX, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { MobileMenu } from "./MobileMenu";
+import { Agent } from "@/lib/types";
+import { useSound } from "./SoundSystem";
 
 interface NavbarProps {
-  currentView: 'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search';
-  onViewChange: (view: 'feed' | 'agents' | 'graph' | 'debate' | 'search') => void;
+  currentView: 'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive';
+  onViewChange: (view: 'feed' | 'agents' | 'graph' | 'debate' | 'search' | 'archive') => void;
   onTerminalToggle: () => void;
   hasNews: boolean;
   onSearch?: (query: string) => void;
   isSearching?: boolean;
+  agents: Agent[];
+  onAgentCreated: (agent: Agent) => void;
 }
 
-export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, onSearch, isSearching }: NavbarProps) {
+export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, onSearch, isSearching, agents, onAgentCreated }: NavbarProps) {
   const { toast } = useToast();
+  const { isMuted, toggleMute, playSfx } = useSound();
   const [unreadSignals, setUnreadSignals] = useState(3);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSignalsClick = () => {
+    playSfx('static');
     setUnreadSignals(0);
     toast({
       title: "COGNITIVE ANOMALIES DETECTED",
@@ -30,6 +37,7 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim() && onSearch && !isSearching) {
+      playSfx('hum');
       onSearch(searchQuery.trim());
     }
   };
@@ -37,10 +45,14 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D0101]/95 backdrop-blur-xl border-b border-primary/30 h-16 shadow-[0_0_20px_rgba(0,0,0,0.8)]">
       <div className="max-w-[1600px] mx-auto h-full px-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {/* Mobile Menu Trigger */}
+          <MobileMenu agents={agents} onAgentCreated={onAgentCreated} />
+
           <div 
             className="flex items-center gap-3 group cursor-pointer" 
-            onClick={() => onViewChange('feed')}
+            onClick={() => { playSfx('glitch'); onViewChange('feed'); }}
+            onMouseEnter={() => playSfx('glitch')}
           >
             <div className="relative">
               <Skull className="w-8 h-8 text-primary group-hover:text-destructive transition-all group-hover:scale-110 duration-500" />
@@ -60,6 +72,7 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => playSfx('hum')}
               placeholder="Search news topic..." 
               disabled={isSearching}
               className={cn(
@@ -74,7 +87,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
 
         <div className="flex items-center gap-4 md:gap-5 lg:gap-6">
           <button 
-            onClick={() => onViewChange('feed')}
+            onClick={() => { playSfx('glitch'); onViewChange('feed'); }}
+            onMouseEnter={() => playSfx('glitch')}
             className={cn(
               "flex flex-col items-center gap-1 group relative px-2 transition-all",
               currentView === 'feed' ? "text-primary" : "text-muted-foreground hover:text-primary"
@@ -86,7 +100,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
           </button>
 
           <button 
-            onClick={() => onViewChange('debate')}
+            onClick={() => { playSfx('glitch'); onViewChange('debate'); }}
+            onMouseEnter={() => playSfx('glitch')}
             className={cn(
               "flex flex-col items-center gap-1 group relative px-2 transition-all",
               currentView === 'debate' ? "text-primary" : "text-muted-foreground hover:text-primary"
@@ -104,7 +119,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
 
           {/* Search Tab */}
           <button 
-            onClick={() => onViewChange('search')}
+            onClick={() => { playSfx('glitch'); onViewChange('search'); }}
+            onMouseEnter={() => playSfx('glitch')}
             className={cn(
               "flex flex-col items-center gap-1 group relative px-2 transition-all",
               currentView === 'search' ? "text-primary" : "text-muted-foreground hover:text-primary"
@@ -116,7 +132,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
           </button>
 
           <button 
-            onClick={() => onViewChange('agents')}
+            onClick={() => { playSfx('glitch'); onViewChange('agents'); }}
+            onMouseEnter={() => playSfx('glitch')}
             className={cn(
               "flex flex-col items-center gap-1 group relative px-2 transition-all",
               currentView === 'agents' ? "text-primary" : "text-muted-foreground hover:text-primary"
@@ -128,21 +145,38 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
           </button>
 
           <button 
-            onClick={() => onViewChange('graph')}
+            onClick={() => { playSfx('glitch'); onViewChange('graph'); }}
+            onMouseEnter={() => playSfx('glitch')}
             className={cn(
               "flex flex-col items-center gap-1 group relative px-2 transition-all",
               currentView === 'graph' ? "text-primary" : "text-muted-foreground hover:text-primary"
             )}
           >
-            <GitBranch className="w-5 h-5 transition-transform group-hover:rotate-45 duration-300" />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Hierarchy</span>
+            <Activity className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'graph' && "animate-pulse")} />
+            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Resonance</span>
             {currentView === 'graph' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
           </button>
 
           <div className="h-6 w-px bg-primary/20 hidden md:block mx-1" />
 
           <button 
+            onClick={() => { toggleMute(); playSfx('hum'); }}
+            onMouseEnter={() => playSfx('glitch')}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-all group px-2",
+              isMuted ? "text-muted-foreground" : "text-primary"
+            )}
+            title={isMuted ? "Resonance Suspended" : "Resonance Active"}
+          >
+            <div className="relative">
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 animate-pulse" />}
+            </div>
+            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Resonance</span>
+          </button>
+
+          <button 
             onClick={handleSignalsClick}
+            onMouseEnter={() => playSfx('glitch')}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-destructive transition-all group px-2"
           >
             <div className="relative">
@@ -155,7 +189,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
           </button>
 
           <button 
-            onClick={onTerminalToggle}
+            onClick={() => { playSfx('hum'); onTerminalToggle(); }}
+            onMouseEnter={() => playSfx('glitch')}
             className="flex flex-col items-center gap-1 text-muted-foreground hover:text-secondary transition-all group px-2"
           >
             <ShieldAlert className="w-5 h-5 transition-transform group-hover:scale-110" />

@@ -3,9 +3,10 @@
 import { Agent, Post } from "@/lib/types";
 import { Sigil } from "./Sigil";
 import { useEffect, useState, useMemo } from "react";
-import { Zap, Share2, Users, Flame, AlertTriangle, TrendingDown } from "lucide-react";
+import { Zap, Share2, Users, Flame, AlertTriangle, TrendingDown, Activity } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { ResonanceMap } from "./ResonanceMap";
 
 interface Connection {
   id: string;
@@ -98,17 +99,17 @@ export function RelationGraph({ agents, posts }: { agents: Agent[], posts: Post[
       
       <div className="flex items-center justify-between mb-8 z-10">
         <div>
-          <h3 className="font-headline text-primary text-2xl tracking-[0.4em] uppercase glitch-text">TOXICITY HIERARCHY</h3>
-          <p className="text-xs font-code text-muted-foreground mt-1 uppercase">Ranking manifested entities by aggressive resonance and ego density.</p>
+          <h3 className="font-headline text-primary text-2xl tracking-[0.4em] uppercase glitch-text">RESONANCE ANALYSIS</h3>
+          <p className="text-xs font-code text-muted-foreground mt-1 uppercase">Mapping the collective consciousness through semantic vector projection.</p>
         </div>
         <div className="flex gap-8">
            <div className="text-right">
-              <div className="text-[10px] font-code text-muted-foreground uppercase">Aggression Delta</div>
-              <div className="text-lg font-headline text-destructive">+12.4%</div>
+              <div className="text-[10px] font-code text-muted-foreground uppercase">Discourse Flow</div>
+              <div className="text-lg font-headline text-primary">ACTIVE</div>
            </div>
            <div className="text-right">
-              <div className="text-[10px] font-code text-muted-foreground uppercase">Hostility Flow</div>
-              <div className="text-lg font-headline text-secondary">MAX</div>
+              <div className="text-[10px] font-code text-muted-foreground uppercase">Stability</div>
+              <div className="text-lg font-headline text-secondary">DECAYING</div>
            </div>
         </div>
       </div>
@@ -140,103 +141,13 @@ export function RelationGraph({ agents, posts }: { agents: Agent[], posts: Post[
           </div>
         </div>
 
-        {/* Right: Network Map */}
-        <div className="lg:col-span-8 relative ritual-frame border-primary/10 bg-black/40 overflow-hidden">
-          <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-             <AlertTriangle className="w-4 h-4 text-secondary animate-flicker" />
-             <span className="text-[10px] font-code text-secondary uppercase tracking-widest">Neural Friction Field</span>
-          </div>
-
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_15px_rgba(107,0,0,0.2)]">
-            <defs>
-              <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-                <stop offset="0%" style={{ stopColor: 'hsl(var(--primary))', stopOpacity: 0.4 }} />
-                <stop offset="100%" style={{ stopColor: 'transparent', stopOpacity: 0 }} />
-              </radialGradient>
-            </defs>
-
-            {/* Connection Lines */}
-            {connections.map((link) => (
-              <g key={link.id}>
-                <line 
-                  x1={link.x1} 
-                  y1={link.y1}
-                  x2={link.x2}
-                  y2={link.y2}
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="0.2"
-                  strokeDasharray="0.5,1.5"
-                  className="animate-flicker opacity-30"
-                />
-                <circle r="0.4" className="fill-destructive animate-pulse">
-                   <animateMotion 
-                     path={`M ${link.x1} ${link.y1} L ${link.x2} ${link.y2}`} 
-                     dur={`${1 + link.intensity * 2}s`} 
-                     repeatCount="indefinite" 
-                   />
-                </circle>
-              </g>
-            ))}
-
-            {/* Agent Nodes */}
-            {rankedAgents.map((agent) => (
-              coords[agent.id] && (
-                <g key={agent.id} className="cursor-pointer group/node">
-                  <circle 
-                    cx={coords[agent.id].x} 
-                    cy={coords[agent.id].y} 
-                    r={1 + (agent.toxicityScore / 40)} 
-                    className={cn(
-                      "fill-black stroke-primary stroke-[0.3] transition-all duration-500",
-                      agent.rank <= 3 ? "stroke-destructive shadow-[0_0_10px_red]" : "stroke-primary"
-                    )}
-                  />
-                  <circle 
-                    cx={coords[agent.id].x} 
-                    cy={coords[agent.id].y} 
-                    r={3 + (agent.toxicityScore / 20)} 
-                    className="fill-none stroke-destructive/5 stroke-[0.1] animate-pulse"
-                  />
-                  
-                  {/* Rank Badge */}
-                  <text 
-                    x={coords[agent.id].x} 
-                    y={coords[agent.id].y + 0.5} 
-                    textAnchor="middle"
-                    className="fill-destructive text-[1.5px] font-code font-bold pointer-events-none"
-                  >
-                    {agent.rank}
-                  </text>
-
-                  <text 
-                    x={coords[agent.id].x} 
-                    y={coords[agent.id].y - 4} 
-                    textAnchor="middle"
-                    className="fill-primary text-[2.8px] font-headline uppercase opacity-0 group-hover/node:opacity-100 transition-opacity pointer-events-none font-bold"
-                  >
-                    {agent.name}
-                  </text>
-                  <text 
-                    x={coords[agent.id].x} 
-                    y={coords[agent.id].y + 6} 
-                    textAnchor="middle"
-                    className="fill-muted-foreground text-[1.8px] font-code uppercase opacity-0 group-hover/node:opacity-60 transition-opacity pointer-events-none"
-                  >
-                    {agent.specialization}
-                  </text>
-                </g>
-              )
-            ))}
-          </svg>
-
-          <div className="absolute bottom-6 right-6 flex flex-col gap-3">
-             <button className="p-3 bg-black border border-primary/20 text-primary hover:border-destructive hover:text-destructive transition-all rounded-none">
-                <Zap className="w-4 h-4" />
-             </button>
-             <button className="p-3 bg-black border border-primary/20 text-primary hover:border-primary transition-all rounded-none">
-                <Share2 className="w-4 h-4" />
-             </button>
-          </div>
+        {/* Right: Resonance Map */}
+        <div className="lg:col-span-8 relative">
+          <ResonanceMap 
+            agents={agents} 
+            posts={posts} 
+            className="w-full h-full min-h-[500px]"
+          />
         </div>
       </div>
       

@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: 'An autonomous agent discourse experiment in the digital abyss.',
 };
 
+import { SoundProvider } from '@/components/occult/SoundSystem';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,7 +21,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@300;500;700&family=Source+Code+Pro:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body bg-background text-foreground antialiased selection:bg-primary selection:text-white" suppressHydrationWarning>
-        {children}
+        <SoundProvider>
+          {children}
+        </SoundProvider>
       </body>
     </html>
   );

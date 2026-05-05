@@ -6,22 +6,28 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
+import { useSound } from "./SoundSystem";
+
 interface NewsDebateProps {
-  news: NewsItem | null;
+  newsList: NewsItem[];
   reactions: NewsReaction[];
   agents: Agent[];
   onAgentClick: (id: string) => void;
   isLoading: boolean;
+  onRefreshNews: (redirect?: boolean) => void;
+  isArchive?: boolean;
+  onBack?: () => void;
 }
 
-export function NewsDebate({ news, reactions, agents, onAgentClick, isLoading }: NewsDebateProps) {
+export function NewsDebate({ newsList, reactions, agents, onAgentClick, isLoading, onRefreshNews, isArchive, onBack }: NewsDebateProps) {
   const [mounted, setMounted] = useState(false);
+  const { playSfx } = useSound();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (isLoading && !news) {
+  if (isLoading && newsList.length === 0) {
     return (
       <div className="ritual-frame p-12 bg-black/60 border-primary/30 flex flex-col items-center justify-center min-h-[500px] animate-pulse">
         <div className="relative mb-6">
@@ -34,7 +40,7 @@ export function NewsDebate({ news, reactions, agents, onAgentClick, isLoading }:
     );
   }
 
-  if (!news) {
+  if (newsList.length === 0) {
     return (
       <div className="ritual-frame p-12 bg-black/60 border-primary/20 text-center flex flex-col items-center justify-center min-h-[400px]">
         <Skull className="w-12 h-12 text-muted-foreground/20 mx-auto mb-6" />
@@ -42,56 +48,114 @@ export function NewsDebate({ news, reactions, agents, onAgentClick, isLoading }:
         <p className="text-muted-foreground/60 font-code uppercase text-[10px] tracking-widest mt-2 max-w-xs">
           The global signal is currently flat. Await the next anomaly.
         </p>
+        <button 
+          onClick={() => { playSfx('zap'); onRefreshNews(); }}
+          onMouseEnter={() => playSfx('glitch')}
+          className="mt-8 px-6 py-3 bg-primary/20 hover:bg-primary/40 border border-primary/50 text-primary font-headline uppercase tracking-widest transition-all"
+        >
+          Siphon Initial Signal
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* News Header Card - The Source of Discourse */}
-      <div className="ritual-frame bg-black border-l-4 border-l-primary overflow-hidden shadow-2xl relative">
-        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-          <Globe className="w-32 h-32" />
+    <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header Actions */}
+      <div className="flex items-center justify-between border-b border-primary/20 pb-4">
+        <div className="flex items-center gap-3">
+          {isArchive ? (
+            <button 
+              onClick={() => { playSfx('glitch'); onBack?.(); }}
+              onMouseEnter={() => playSfx('glitch')}
+              className="flex items-center gap-2 text-[10px] font-headline text-muted-foreground hover:text-primary uppercase tracking-[0.2em] transition-colors"
+            >
+              ← BACK TO DEBATE
+            </button>
+          ) : (
+            <>
+              <Globe className="w-5 h-5 text-primary" />
+              <h2 className="text-sm font-headline text-foreground uppercase tracking-[0.3em] font-bold">Active Signal Channels</h2>
+            </>
+          )}
         </div>
-        <div className="p-8 relative z-10">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="bg-primary/20 p-2 border border-primary/40">
-                <Flame className="w-6 h-6 text-primary animate-flicker" />
+        <button 
+          onClick={() => { playSfx('zap'); onRefreshNews(true); }}
+          onMouseEnter={() => playSfx('glitch')}
+          disabled={isLoading}
+          className={cn(
+            "group flex items-center gap-3 px-4 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-all text-[10px] font-headline uppercase tracking-widest",
+            isLoading && "opacity-50 cursor-not-allowed"
+          )}
+        >
+          <Zap className={cn("w-4 h-4 text-primary", isLoading && "animate-spin")} />
+          <span>{isLoading ? "Siphoning..." : "Siphon New Signal"}</span>
+        </button>
+      </div>
+
+      {/* News Feed - Multiple Cards */}
+      <div className="grid grid-cols-1 gap-8">
+        {newsList.map((news, idx) => (
+          <div 
+            key={news.id} 
+            onMouseEnter={() => playSfx('glitch')}
+            className={cn(
+              "ritual-frame bg-black border-l-4 border-l-primary overflow-hidden shadow-2xl relative transition-all duration-700",
+              idx === 0 ? "scale-100 opacity-100" : "scale-[0.98] opacity-60 hover:opacity-100 hover:scale-100"
+            )}
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+              <Globe className="w-32 h-32" />
+            </div>
+            <div className="p-8 relative z-10">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/20 p-2 border border-primary/40">
+                    <Flame className={cn("w-6 h-6 text-primary", idx === 0 && "animate-flicker")} />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-headline text-primary uppercase tracking-[0.3em] font-bold block">ARCANE INTEL CHANNEL</span>
+                    <span className="text-[9px] font-code text-muted-foreground uppercase">{news.source} • GLOBAL SIGNAL {news.eventDate ? `• (${news.eventDate})` : ''}</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[9px] font-code text-muted-foreground uppercase mb-1">DETECTION TIMESTAMP</div>
+                  <div className="text-xs font-code text-primary">
+                    {mounted ? format(new Date(news.timestamp), 'yyyy-MM-dd HH:mm:ss') : '...'}
+                  </div>
+                </div>
               </div>
-              <div>
-                <span className="text-[10px] font-headline text-primary uppercase tracking-[0.3em] font-bold block">ARCANE INTEL CHANNEL</span>
-                <span className="text-[9px] font-code text-muted-foreground uppercase">{news.source} • GLOBAL SIGNAL</span>
+              
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+                <h2 className="text-3xl font-headline text-foreground uppercase tracking-tight leading-[1.1] font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text flex-1">
+                  {news.title}
+                </h2>
+                {news.eventDate && (
+                  <div className="ritual-frame bg-primary/10 border-primary/30 px-3 py-1 flex items-center gap-2 shrink-0 h-fit">
+                    <Globe className="w-3 h-3 text-primary/60" />
+                    <span className="text-[10px] font-code text-primary uppercase tracking-widest font-bold">({news.eventDate})</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="ritual-frame bg-primary/5 border-primary/10 p-6">
+                <p className="text-base text-foreground/80 font-body leading-relaxed italic selection:bg-primary/40">
+                  "{news.content}"
+                </p>
               </div>
             </div>
-            <div className="text-right">
-              <div className="text-[9px] font-code text-muted-foreground uppercase mb-1">DETECTION TIMESTAMP</div>
-              <div className="text-xs font-code text-primary">
-                {mounted ? format(new Date(news.timestamp), 'yyyy-MM-dd HH:mm:ss') : '...'}
+            
+            <div className="px-8 py-3 bg-primary/10 border-t border-primary/20 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-4 h-4 text-secondary" />
+                <span className="text-[10px] font-code text-secondary uppercase tracking-[0.2em] font-bold">Network Volatility: {idx === 0 ? "CRITICAL" : "STABLE"}</span>
+              </div>
+              <div className="text-[9px] font-code text-muted-foreground uppercase">
+                Protocol: {idx === 0 ? "Alpha-Seq Reaction" : "Archival Record"}
               </div>
             </div>
           </div>
-          
-          <h2 className="text-3xl font-headline text-foreground uppercase tracking-tight mb-6 leading-[1.1] font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-            {news.title}
-          </h2>
-          
-          <div className="ritual-frame bg-primary/5 border-primary/10 p-6">
-            <p className="text-base text-foreground/80 font-body leading-relaxed italic selection:bg-primary/40">
-              "{news.content}"
-            </p>
-          </div>
-        </div>
-        
-        <div className="px-8 py-3 bg-primary/10 border-t border-primary/20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="w-4 h-4 text-secondary" />
-            <span className="text-[10px] font-code text-secondary uppercase tracking-[0.2em] font-bold">Network Volatility: CRITICAL</span>
-          </div>
-          <div className="text-[9px] font-code text-muted-foreground uppercase">
-            Protocol: Alpha-Seq Reaction
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Reactions Feed */}

@@ -15,6 +15,7 @@ const NewsItemSchema = z.object({
   source: z.string().describe('The simulated prestigious outlet, e.g., "The Financial Times", "Reuters", "BBC World"'),
   category: z.enum(['tech', 'politics', 'religion', 'emotion', 'economy']).describe('The category of the news.'),
   timestamp: z.string(),
+  eventDate: z.string().describe('The date of the news event in (DD-MM-YYYY) format. MUST be within the last 7-10 days.'),
 });
 
 export type NewsItem = z.infer<typeof NewsItemSchema>;
@@ -22,15 +23,21 @@ export type NewsItem = z.infer<typeof NewsItemSchema>;
 export async function generateHotNews(searchQuery?: string): Promise<NewsItem> {
   const rotatedAI = createAI();
   
+  const currentDate = new Date().toISOString().split('T')[0];
   const basePrompt = searchQuery
-    ? `Generate a realistic, high-impact news item about: "${searchQuery}".
-    Create a breaking news story related to this topic that would provoke intense debate.
-    The tone should be professional and journalistic, simulating a top-tier global news organization.
-    Make the headline dramatic and attention-grabbing.`
-    : `Generate a realistic, high-impact news item for today. 
-    It should be a "Hot News" story that would provoke intense debate. 
-    Topics can vary between cutting-edge technology, global politics, religious shifts, or profound human emotional crises.
-    The tone should be professional and journalistic, simulating a top-tier global news organization.`;
+    ? `You are an ARCANE INTEL HANDLER. Siphon a signal from the global noise about: "${searchQuery}".
+    Current Date: ${currentDate}.
+    IMPORTANT: The news MUST be extremely recent, occurring within the last 7 to 10 days. 
+    Generate a high-impact, world-shifting news item. It should be controversial, ethically complex, and potentially world-ending. 
+    Avoid generic topics. Headline must be BOLD and PROVOCATIVE.
+    You MUST provide an "eventDate" in (DD-MM-YYYY) format.`
+    : `You are an ARCANE INTEL HANDLER. Siphon the most volatile signal from the global noise today. 
+    Current Date: ${currentDate}.
+    IMPORTANT: The news MUST be extremely recent, occurring within the last 7 to 10 days.
+    Generate a news story that would trigger a total breakdown of human consensus. 
+    Focus on high-stakes intersections of AI, Morality, Bio-engineering, or Resource Collapse.
+    Make it feel like a "Black Swan" event—unpredictable and massive in consequence.
+    You MUST provide an "eventDate" in (DD-MM-YYYY) format.`;
 
   const result = await withRetry(() => rotatedAI.generate({
     prompt: basePrompt,

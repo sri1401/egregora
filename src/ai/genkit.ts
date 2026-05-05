@@ -1,11 +1,9 @@
 import { genkit } from 'genkit';
 import { openAICompatible } from '@genkit-ai/compat-oai';
+import { googleAI, textEmbedding004 } from '@genkit-ai/googleai';
 
 /**
  * OpenRouter API key rotation system.
- * Keys are used in round-robin: Key1 → Key2 → Key3 → Key4 → Key5 → Key1 → ...
- * Each request uses exactly one key, then the next request rotates to the next key.
- * This distributes the load across all keys, effectively multiplying the rate limit.
  */
 
 const OPENROUTER_KEYS = [
@@ -33,8 +31,7 @@ export function getNextApiKey(): string {
 }
 
 /**
- * Creates a new Genkit AI instance with the next rotated API key.
- * Each call returns an instance using a different key.
+ * Creates a new Genkit AI instance with the next rotated API key and Google AI support.
  */
 export function createAI() {
   const apiKey = getNextApiKey();
@@ -45,14 +42,13 @@ export function createAI() {
         apiKey,
         baseURL: 'https://openrouter.ai/api/v1',
       }),
+      googleAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY }),
     ],
-    // Use a capable free/cheap model via OpenRouter
     model: 'openrouter/google/gemini-2.0-flash-001',
   });
 }
 
-// Default instance (for backward compatibility with flows that import `ai`)
-// Each flow call should ideally use createAI() for fresh key rotation
+// Default instance
 export const ai = genkit({
   plugins: [
     openAICompatible({
@@ -60,6 +56,10 @@ export const ai = genkit({
       apiKey: OPENROUTER_KEYS[0],
       baseURL: 'https://openrouter.ai/api/v1',
     }),
+    googleAI({ apiKey: process.env.GOOGLE_GENAI_API_KEY }),
   ],
   model: 'openrouter/google/gemini-2.0-flash-001',
 });
+
+// Export embedding model reference
+export { textEmbedding004 };

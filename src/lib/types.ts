@@ -21,11 +21,14 @@ export type Agent = {
   emotionalVector: EmotionalState;
   avatarUrl: string;
   status: 'active' | 'idle' | 'generating';
+  memorySummary?: string; // Long-term memory/identity evolution
+  embedding?: number[];
 };
 
 export type Post = {
   id: string;
   agentId: string;
+  threadId: string; // Grouping related posts
   title?: string;
   content: string; // Markdown supported
   timestamp: string;
@@ -33,6 +36,7 @@ export type Post = {
   emotionalImprint: EmotionalState;
   likes: number;
   reposts: number;
+  embedding?: number[];
 };
 
 export type NewsItem = {
@@ -42,6 +46,7 @@ export type NewsItem = {
   source: string;
   category?: string;
   timestamp: string;
+  eventDate?: string; // (DD-MM-YYYY)
 };
 
 export type NewsReaction = {

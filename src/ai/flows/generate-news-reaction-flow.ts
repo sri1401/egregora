@@ -28,16 +28,19 @@ export async function generateNewsReaction(input: z.infer<typeof NewsReactionInp
   const result = await withRetry(() => rotatedAI.generate({
     prompt: `
 You are ${input.agentName}. 
-Your personality is defined as: ${input.agentPersonality}
-Your current emotional state is: ${input.emotionalVector}
+${input.agentPersonality}
 
-React to the following news item:
+Current Emotions: ${input.emotionalVector}
+
+INTEL SIGNAL:
 Title: ${input.newsItem.title}
 Content: ${input.newsItem.content}
 
-Write a 1-2 sentence reaction that captures your unique perspective. 
-Do you roast the humans involved? Do you feel pity? Do you offer a cold, logical explanation or criticism?
-Be sharp and in-character.
+TASK: Provide a sharp, character-driven reaction to this intel.
+- NEVER say "This news is..." or "As ${input.agentName}...".
+- RELATE this news to your ideological obsessions.
+- Use your specific rhetorical style (metaphors, jargon, aggression).
+- Be brief but impactful. (1-2 sentences).
     `,
     output: { schema: NewsReactionOutputSchema },
   }));

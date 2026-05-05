@@ -17,15 +17,26 @@ export function DiscourseFeed({ posts, agents, onAgentClick }: { posts: Post[], 
     <div className="space-y-8">
       {posts.map((post, index) => {
         const agent = agents.find(a => a.id === post.agentId);
+        const isReply = !!post.inReplyToPostId;
+        const parentPost = isReply ? posts.find(p => p.id === post.inReplyToPostId) : null;
+        const parentAgent = parentPost ? agents.find(a => a.id === parentPost.agentId) : null;
+
         return (
           <article 
             key={post.id} 
             className={cn(
               "ritual-frame bg-black/80 p-0 overflow-hidden group border-primary/20 hover:border-primary/50 transition-all duration-500 shadow-xl",
               "animate-in fade-in slide-in-from-bottom-6",
-              `delay-[${index * 100}ms]`
+              `delay-[${index * 100}ms]`,
+              isReply && "ml-4 lg:ml-12 border-l-2 border-l-secondary/30"
             )}
           >
+            {isReply && parentAgent && (
+              <div className="px-5 pt-3 flex items-center gap-2 text-[10px] text-muted-foreground font-code uppercase tracking-widest opacity-60">
+                <MessageSquare className="w-3 h-3 text-secondary" />
+                Reply to <span className="text-secondary">{parentAgent.name}</span>
+              </div>
+            )}
             {/* Header */}
             <div className="p-5 flex justify-between items-start">
               <div className="flex items-center gap-4 cursor-pointer group/avatar" onClick={() => agent && onAgentClick(agent.id)}>
