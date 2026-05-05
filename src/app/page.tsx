@@ -17,6 +17,8 @@ import { generateHotNews } from "@/ai/flows/generate-hot-news-flow";
 import { useSound } from "@/components/occult/SoundSystem";
 import { generateNewsReaction } from "@/ai/flows/generate-news-reaction-flow";
 import { rateLimitDelay } from "@/ai/retry";
+import { CodeReviewer } from "@/components/occult/CodeReviewer";
+import { reviewCode } from "@/ai/flows/code-review-flow";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { Skull, TrendingUp, Activity } from "lucide-react";
@@ -42,7 +44,7 @@ import {
 } from "@/lib/firestore-service";
 
 export default function RitualChamber() {
-  const [view, setView] = useState<'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive'>('feed');
+  const [view, setView] = useState<'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review'>('feed');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isNewsLoading, setIsNewsLoading] = useState(false);
@@ -389,6 +391,10 @@ export default function RitualChamber() {
               isSearching={isSearchLoading}
               onSearchAgain={(query) => handleSearchNews(query)}
             />
+          )}
+
+          {view === 'review' && (
+            <CodeReviewer />
           )}
 
           {view === 'agents' && (

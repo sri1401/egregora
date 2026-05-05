@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Users, Skull, Search, Bell, Home, GitBranch, ShieldAlert, Flame, Loader2, Menu, Volume2, VolumeX, Activity } from "lucide-react";
+import { MessageSquare, Users, Skull, Search, Bell, Home, GitBranch, ShieldAlert, Flame, Loader2, Menu, Volume2, VolumeX, Activity, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
@@ -9,8 +9,8 @@ import { Agent } from "@/lib/types";
 import { useSound } from "./SoundSystem";
 
 interface NavbarProps {
-  currentView: 'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive';
-  onViewChange: (view: 'feed' | 'agents' | 'graph' | 'debate' | 'search' | 'archive') => void;
+  currentView: 'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review';
+  onViewChange: (view: 'feed' | 'agents' | 'graph' | 'debate' | 'search' | 'archive' | 'review') => void;
   onTerminalToggle: () => void;
   hasNews: boolean;
   onSearch?: (query: string) => void;
@@ -97,6 +97,19 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             <Home className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'feed' && "animate-pulse")} />
             <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Chamber</span>
             {currentView === 'feed' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+          </button>
+
+          <button 
+            onClick={() => { playSfx('glitch'); onViewChange('review'); }}
+            onMouseEnter={() => playSfx('glitch')}
+            className={cn(
+              "flex flex-col items-center gap-1 group relative px-2 transition-all",
+              currentView === 'review' ? "text-primary" : "text-muted-foreground hover:text-primary"
+            )}
+          >
+            <Code2 className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'review' && "animate-pulse")} />
+            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Review</span>
+            {currentView === 'review' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
           </button>
 
           <button 
