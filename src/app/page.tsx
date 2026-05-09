@@ -21,7 +21,7 @@ import { CodeReviewer } from "@/components/occult/CodeReviewer";
 import { reviewCode } from "@/ai/flows/code-review-flow";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-import { Skull, TrendingUp, Activity } from "lucide-react";
+import { Skull, TrendingUp, Activity, ShieldAlert } from "lucide-react";
 import { ObserverStats } from "@/components/occult/ObserverStats";
 import { ResonanceTrends } from "@/components/occult/ResonanceTrends";
 import { EngineStats } from "@/components/occult/EngineStats";
@@ -43,8 +43,12 @@ import {
   updateAgentMemory,
 } from "@/lib/firestore-service";
 
+import { CybersecurityAnalysis } from "@/components/occult/CybersecurityAnalysis";
+import { InterviewAnalysis } from "@/components/occult/InterviewAnalysis";
+import { UserCheck } from "lucide-react";
+
 export default function RitualChamber() {
-  const [view, setView] = useState<'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review'>('feed');
+  const [view, setView] = useState<'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review' | 'cybersecurity' | 'interview'>('feed');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isNewsLoading, setIsNewsLoading] = useState(false);
@@ -314,7 +318,7 @@ export default function RitualChamber() {
   return (
     <main className="min-h-screen bg-background text-foreground font-body pb-10 selection:bg-primary/40">
       <Navbar 
-        currentView={view === 'profile' ? 'agents' : view} 
+        currentView={(view === 'profile' || view === 'cybersecurity' || view === 'interview') ? 'agents' : view} 
         onViewChange={(v) => { 
           if (v === 'debate' && !hotNews) {
             triggerNewsDebate();
@@ -400,11 +404,37 @@ export default function RitualChamber() {
           {view === 'agents' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                <div className="flex items-center justify-between mb-6 px-2">
-                  <h2 className="text-xl font-headline text-primary uppercase tracking-[0.3em] font-bold">Manifested Entities</h2>
-                  <div className="text-[9px] text-muted-foreground font-code uppercase">Count: {agents.length}</div>
+                  <div>
+                    <h2 className="text-xl font-headline text-primary uppercase tracking-[0.3em] font-bold">Manifested Entities</h2>
+                    <div className="text-[9px] text-muted-foreground font-code uppercase mt-1">Count: {agents.length}</div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => { playSfx('glitch'); setView('interview'); }}
+                      className="px-4 py-2 bg-primary/10 hover:bg-primary border border-primary/30 text-primary hover:text-black font-headline uppercase tracking-widest text-xs transition-all flex items-center gap-2"
+                    >
+                      <UserCheck className="w-4 h-4" />
+                      Smart Interview
+                    </button>
+                    <button 
+                      onClick={() => { playSfx('glitch'); setView('cybersecurity'); }}
+                      className="px-4 py-2 bg-primary/10 hover:bg-primary border border-primary/30 text-primary hover:text-black font-headline uppercase tracking-widest text-xs transition-all flex items-center gap-2"
+                    >
+                      <ShieldAlert className="w-4 h-4" />
+                      Cyber Analysis
+                    </button>
+                  </div>
                </div>
                <AgentDirectory agents={agents} onAgentClick={handleAgentClick} />
             </div>
+          )}
+
+          {view === 'cybersecurity' && (
+            <CybersecurityAnalysis onBack={() => setView('agents')} />
+          )}
+
+          {view === 'interview' && (
+            <InterviewAnalysis onBack={() => setView('agents')} />
           )}
 
           {view === 'graph' && (
