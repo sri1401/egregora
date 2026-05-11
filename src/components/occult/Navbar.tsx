@@ -9,8 +9,8 @@ import { Agent } from "@/lib/types";
 import { useSound } from "./SoundSystem";
 
 interface NavbarProps {
-  currentView: 'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review';
-  onViewChange: (view: 'feed' | 'agents' | 'graph' | 'debate' | 'search' | 'archive' | 'review') => void;
+  currentView: 'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review' | 'cyber';
+  onViewChange: (view: 'feed' | 'agents' | 'graph' | 'debate' | 'search' | 'archive' | 'review' | 'cyber') => void;
   onTerminalToggle: () => void;
   hasNews: boolean;
   onSearch?: (query: string) => void;
@@ -43,7 +43,7 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D0101]/95 backdrop-blur-xl border-b border-primary/30 h-16 shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border h-16 shadow-sm">
       <div className="max-w-[1600px] mx-auto h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Mobile Menu Trigger */}
@@ -55,10 +55,9 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             onMouseEnter={() => playSfx('glitch')}
           >
             <div className="relative">
-              <Skull className="w-8 h-8 text-primary group-hover:text-destructive transition-all group-hover:scale-110 duration-500" />
-              <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse group-hover:bg-destructive/40" />
+              <Activity className="w-8 h-8 text-primary transition-all group-hover:scale-105 duration-300" />
             </div>
-            <span className="font-headline text-lg text-primary font-bold tracking-[0.2em] hidden lg:block glitch-text uppercase">EGREGORA</span>
+            <span className="font-headline text-lg text-foreground font-bold tracking-tight hidden lg:block uppercase">EGREGORA</span>
           </div>
           
           {/* Quick search in navbar */}
@@ -66,7 +65,7 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             {isSearching ? (
               <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
             ) : (
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             )}
             <input 
               type="text"
@@ -76,9 +75,9 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
               placeholder="Search news topic..." 
               disabled={isSearching}
               className={cn(
-                "bg-primary/5 border border-primary/20 pl-11 pr-6 py-2 rounded-none text-xs w-[200px]",
-                "focus:border-primary/60 focus:bg-primary/10 focus:outline-none focus:w-[260px]",
-                "transition-all duration-300 font-code",
+                "bg-muted border border-border pl-11 pr-6 py-2 rounded-md text-xs w-[200px]",
+                "focus:border-primary/60 focus:bg-background focus:outline-none focus:w-[260px]",
+                "transition-all duration-300 font-body",
                 isSearching && "opacity-60 cursor-not-allowed"
               )}
             />
@@ -95,8 +94,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             )}
           >
             <Home className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'feed' && "animate-pulse")} />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Chamber</span>
-            {currentView === 'feed' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+            <span className="text-[10px] font-medium hidden md:block">Feed</span>
+            {currentView === 'feed' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary" />}
           </button>
 
           <button 
@@ -108,8 +107,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             )}
           >
             <Code2 className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'review' && "animate-pulse")} />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Review</span>
-            {currentView === 'review' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+            <span className="text-[10px] font-medium hidden md:block">Review</span>
+            {currentView === 'review' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary" />}
           </button>
 
           <button 
@@ -121,13 +120,13 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             )}
           >
             <div className="relative">
-              <Flame className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'debate' && "animate-flicker")} />
+              <Flame className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'debate' && "animate-pulse")} />
               {hasNews && currentView !== 'debate' && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full animate-pulse border border-black" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-destructive rounded-full border border-background" />
               )}
             </div>
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Hot Debate</span>
-            {currentView === 'debate' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+            <span className="text-[10px] font-medium hidden md:block">Hot News</span>
+            {currentView === 'debate' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary" />}
           </button>
 
           {/* Search Tab */}
@@ -140,8 +139,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             )}
           >
             <Search className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'search' && "animate-pulse")} />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Search</span>
-            {currentView === 'search' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+            <span className="text-[10px] font-medium hidden md:block">Search</span>
+            {currentView === 'search' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary" />}
           </button>
 
           <button 
@@ -153,8 +152,8 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             )}
           >
             <Users className="w-5 h-5 transition-transform group-hover:scale-110" />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Entities</span>
-            {currentView === 'agents' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+            <span className="text-[10px] font-medium hidden md:block">Agents</span>
+            {currentView === 'agents' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary" />}
           </button>
 
           <button 
@@ -166,11 +165,11 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
             )}
           >
             <Activity className={cn("w-5 h-5 transition-transform group-hover:scale-110", currentView === 'graph' && "animate-pulse")} />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Resonance</span>
-            {currentView === 'graph' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+            <span className="text-[10px] font-medium hidden md:block">Resonance</span>
+            {currentView === 'graph' && <div className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-primary" />}
           </button>
 
-          <div className="h-6 w-px bg-primary/20 hidden md:block mx-1" />
+          <div className="h-6 w-px bg-border hidden md:block mx-1" />
 
           <button 
             onClick={() => { toggleMute(); playSfx('hum'); }}
@@ -179,35 +178,34 @@ export function Navbar({ currentView, onViewChange, onTerminalToggle, hasNews, o
               "flex flex-col items-center gap-1 transition-all group px-2",
               isMuted ? "text-muted-foreground" : "text-primary"
             )}
-            title={isMuted ? "Resonance Suspended" : "Resonance Active"}
           >
             <div className="relative">
-              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5 animate-pulse" />}
+              {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </div>
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Resonance</span>
+            <span className="text-[10px] font-medium hidden md:block">Sound</span>
           </button>
 
           <button 
             onClick={handleSignalsClick}
             onMouseEnter={() => playSfx('glitch')}
-            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-destructive transition-all group px-2"
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground transition-all group px-2"
           >
             <div className="relative">
-              <Bell className="w-5 h-5 transition-transform group-hover:animate-bounce" />
+              <Bell className="w-5 h-5 transition-transform group-hover:scale-105" />
               {unreadSignals > 0 && (
-                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-destructive rounded-full border border-background animate-pulse" />
+                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-destructive rounded-full border border-background" />
               )}
             </div>
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Signals</span>
+            <span className="text-[10px] font-medium hidden md:block">Signals</span>
           </button>
 
           <button 
             onClick={() => { playSfx('hum'); onTerminalToggle(); }}
             onMouseEnter={() => playSfx('glitch')}
-            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-secondary transition-all group px-2"
+            className="flex flex-col items-center gap-1 text-muted-foreground hover:text-foreground transition-all group px-2"
           >
-            <ShieldAlert className="w-5 h-5 transition-transform group-hover:scale-110" />
-            <span className="text-[9px] font-headline uppercase tracking-[0.2em] font-bold hidden md:block">Terminal</span>
+            <GitBranch className="w-5 h-5 transition-transform group-hover:scale-110" />
+            <span className="text-[10px] font-medium hidden md:block">Console</span>
           </button>
         </div>
       </div>

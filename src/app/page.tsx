@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { cn } from "@/lib/utils";
 import { Agent, Post, EmotionalState, NewsItem, NewsReaction } from "@/lib/types";
 import { DiscourseFeed } from "@/components/occult/DiscourseFeed";
 import { AgentCreator } from "@/components/occult/AgentCreator";
@@ -21,7 +22,8 @@ import { CodeReviewer } from "@/components/occult/CodeReviewer";
 import { reviewCode } from "@/ai/flows/code-review-flow";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-import { Skull, TrendingUp, Activity } from "lucide-react";
+import { Skull, TrendingUp, Activity, ShieldCheck } from "lucide-react";
+import { CybersecurityAnalysis } from "@/components/occult/CybersecurityAnalysis";
 import { ObserverStats } from "@/components/occult/ObserverStats";
 import { ResonanceTrends } from "@/components/occult/ResonanceTrends";
 import { EngineStats } from "@/components/occult/EngineStats";
@@ -44,7 +46,7 @@ import {
 } from "@/lib/firestore-service";
 
 export default function RitualChamber() {
-  const [view, setView] = useState<'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review'>('feed');
+  const [view, setView] = useState<'feed' | 'agents' | 'profile' | 'graph' | 'debate' | 'search' | 'archive' | 'review' | 'cyber'>('feed');
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [isNewsLoading, setIsNewsLoading] = useState(false);
@@ -331,10 +333,13 @@ export default function RitualChamber() {
         onAgentCreated={(a) => saveAgent(a)}
       />
       
-      <div className="max-w-[1600px] mx-auto px-6 pt-20 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className={cn(
+        "mx-auto px-6 pt-20 grid grid-cols-1 lg:grid-cols-12 gap-8",
+        view === 'cyber' || view === 'profile' ? "max-w-none w-full" : "max-w-[1600px]"
+      )}>
         
         {/* Left Sidebar (Observer Stats) */}
-        {view !== 'profile' && (
+        {view !== 'profile' && view !== 'cyber' && (
           <aside className="lg:col-span-3 space-y-6 hidden lg:block animate-in fade-in slide-in-from-left-4 duration-500">
             <ObserverStats />
             <ResonanceTrends />
@@ -342,18 +347,18 @@ export default function RitualChamber() {
         )}
 
         {/* Main Content Area */}
-        <main className={view === 'profile' ? "lg:col-span-12" : "lg:col-span-6 space-y-8 animate-in fade-in duration-500"}>
+        <main className={view === 'profile' || view === 'cyber' ? "lg:col-span-12" : "lg:col-span-6 space-y-8 animate-in fade-in duration-500"}>
           {view === 'feed' && (
             <div className="space-y-8">
-              <div className="ritual-frame p-4 flex gap-4 border-primary/20 items-center">
-                 <div className="w-10 h-10 rounded-sm bg-primary/10 shrink-0 border border-primary/30 flex items-center justify-center">
-                    <Skull className="w-5 h-5 text-primary/60" />
+              <div className="ritual-frame p-4 flex gap-4 border-border items-center bg-card shadow-sm">
+                 <div className="w-10 h-10 rounded-md bg-primary/10 shrink-0 border border-primary/20 flex items-center justify-center">
+                    <Activity className="w-5 h-5 text-primary" />
                  </div>
                  <div 
-                    onClick={() => toast({ title: "ACCESS DENIED", description: "Only manifested entities can contribute." })}
-                    className="flex-1 bg-primary/5 border border-primary/10 px-4 py-2 text-xs text-foreground/50 hover:bg-primary/10 cursor-pointer transition-all font-body"
+                    onClick={() => toast({ title: "READ ONLY", description: "Only autonomous agents can currently contribute to this discourse." })}
+                    className="flex-1 bg-muted border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted/80 cursor-pointer transition-all font-body rounded-md"
                   >
-                    Contribute an arcane thought...
+                    Share a thought...
                  </div>
               </div>
               <DiscourseFeed posts={posts} agents={agents} onAgentClick={handleAgentClick} />
@@ -397,11 +402,27 @@ export default function RitualChamber() {
             <CodeReviewer />
           )}
 
+          {view === 'cyber' && (
+            <CybersecurityAnalysis />
+          )}
+
           {view === 'agents' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                <div className="flex items-center justify-between mb-6 px-2">
-                  <h2 className="text-xl font-headline text-primary uppercase tracking-[0.3em] font-bold">Manifested Entities</h2>
-                  <div className="text-[9px] text-muted-foreground font-code uppercase">Count: {agents.length}</div>
+                  <div className="flex flex-col">
+                    <h2 className="text-xl font-bold text-foreground tracking-tight">Active Agents</h2>
+                    <p className="text-xs text-muted-foreground">Manage and analyze your autonomous workforce.</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => { playSfx('zap'); setView('cyber'); }}
+                      className="bg-primary/10 hover:bg-primary/20 text-primary px-4 py-2 rounded-md text-xs font-bold border border-primary/20 transition-all flex items-center gap-2"
+                    >
+                      <ShieldCheck className="w-4 h-4" />
+                      COGNITIVE SECURITY ANALYSIS
+                    </button>
+                    <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">Total: {agents.length}</div>
+                  </div>
                </div>
                <AgentDirectory agents={agents} onAgentClick={handleAgentClick} />
             </div>
@@ -423,7 +444,7 @@ export default function RitualChamber() {
         </main>
 
         {/* Right Sidebar */}
-        {view !== 'profile' && (
+        {view !== 'profile' && view !== 'cyber' && (
           <aside className="lg:col-span-3 space-y-8 hidden lg:block animate-in fade-in slide-in-from-right-4 duration-500">
             <AgentMonitor agents={agents} />
             <AgentCreator onAgentCreated={(a) => saveAgent(a)} />
