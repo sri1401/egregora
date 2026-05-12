@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldAlert, Code2, Zap, Bug, ShieldCheck, ListChecks, Loader2, Search, Brain, Database, FileText, Activity } from "lucide-react";
+import { ShieldAlert, Code2, Zap, Bug, ShieldCheck, ListChecks, Loader2, Search, Brain, Database, FileText, Activity, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,6 +16,13 @@ import {
 import { generateCode } from "@/ai/flows/code-generation-flow";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
 
 export function CodeReviewer() {
   const [code, setCode] = useState("");
@@ -116,11 +123,58 @@ export function CodeReviewer() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-headline text-primary uppercase tracking-[0.3em] font-bold">Smart Code Reviewer</h2>
-        <p className="text-muted-foreground text-sm font-body">
-          Paste your code to initiate a parallel cognitive scan by three specialized AI entities.
-        </p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-headline text-primary uppercase tracking-[0.3em] font-bold">Smart Code Reviewer</h2>
+          <p className="text-muted-foreground text-sm font-body">
+            Paste your code to initiate a parallel cognitive scan by three specialized AI entities.
+          </p>
+        </div>
+        
+        {(isReviewing || stages.research || stages.analysis || stages.memory || stages.critique || stages.output) && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="border-primary/30 text-primary hover:bg-primary/10 font-headline uppercase tracking-widest text-[10px] gap-2">
+                <Maximize2 className="w-3 h-3" /> Full Screen View
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-[95vw] w-full max-h-[90vh] overflow-y-auto bg-[#0D0101] border-primary/20 backdrop-blur-xl ritual-frame p-8">
+              <DialogHeader className="mb-6">
+                <DialogTitle className="text-primary font-headline tracking-[0.3em] uppercase text-xl flex items-center gap-3">
+                  <Activity className="w-5 h-5 animate-pulse" /> Cognitive Workspace
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-8">
+                {/* Progress Grid in Popup */}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  {renderStageCard("Research", Search, "text-blue-400", "border-blue-500/50", "ring-blue-500", stages.research, currentStage === 'research', "Hunting for patterns...")}
+                  {renderStageCard("Analysis", Brain, "text-emerald-400", "border-emerald-500/50", "ring-emerald-500", stages.analysis, currentStage === 'analysis', "Reasoning logic...")}
+                  {renderStageCard("Memory", Database, "text-amber-600", "border-amber-700/50", "ring-amber-600", stages.memory, currentStage === 'memory', "Recalling context...")}
+                  {renderStageCard("Critique", ShieldAlert, "text-red-700", "border-red-900/50", "ring-red-700", stages.critique, currentStage === 'critique', "Stress testing...")}
+                  {renderStageCard("Output", FileText, "text-green-500", "border-green-500/50", "ring-green-500", stages.output, currentStage === 'output', "Manifesting report...")}
+                </div>
+
+                {/* Final Report in Popup */}
+                {stages.output && (
+                  <Card className="bg-primary/5 border-primary/30 backdrop-blur-xl relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-primary/50" />
+                    <CardHeader className="border-b border-primary/10 py-4">
+                      <CardTitle className="text-primary flex items-center gap-3 text-base font-headline tracking-[0.2em] uppercase font-bold">
+                        <Activity className="w-5 h-5 animate-pulse" /> 360° Cognitive Synthesis
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-8">
+                      <div className="prose prose-invert prose-sm max-w-none font-body leading-relaxed text-foreground/90 whitespace-pre-wrap">
+                        {stages.output}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
 
       <Tabs defaultValue="review" className="w-full" onValueChange={setActiveTab}>
@@ -188,95 +242,11 @@ export function CodeReviewer() {
             <div className="space-y-6 animate-in slide-in-from-bottom-8 duration-700">
               {/* Sequential Progress Grid */}
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {/* Stage 1: Research */}
-                <Card className={cn(
-                  "bg-[#0D0101]/40 border-blue-500/20 backdrop-blur-sm transition-all duration-500",
-                  stages.research ? "opacity-100 border-blue-500/50" : "opacity-40",
-                  currentStage === 'research' && "ring-1 ring-blue-500 animate-pulse opacity-100"
-                )}>
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-blue-400 text-[10px] font-headline tracking-widest uppercase flex items-center gap-2">
-                      <Search className="w-3 h-3" /> Research
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0">
-                    <div className="text-[9px] font-code text-muted-foreground h-16 overflow-hidden text-ellipsis line-clamp-3">
-                      {stages.research || (currentStage === 'research' ? "Hunting for patterns..." : "Waiting...")}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Stage 2: Analysis */}
-                <Card className={cn(
-                  "bg-[#0D0101]/40 border-emerald-500/20 backdrop-blur-sm transition-all duration-500",
-                  stages.analysis ? "opacity-100 border-emerald-500/50" : "opacity-40",
-                  currentStage === 'analysis' && "ring-1 ring-emerald-500 animate-pulse opacity-100"
-                )}>
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-emerald-400 text-[10px] font-headline tracking-widest uppercase flex items-center gap-2">
-                      <Brain className="w-3 h-3" /> Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0">
-                    <div className="text-[9px] font-code text-muted-foreground h-16 overflow-hidden text-ellipsis line-clamp-3">
-                      {stages.analysis || (currentStage === 'analysis' ? "Reasoning logic..." : "Waiting...")}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Stage 3: Memory */}
-                <Card className={cn(
-                  "bg-[#0D0101]/40 border-amber-700/20 backdrop-blur-sm transition-all duration-500",
-                  stages.memory ? "opacity-100 border-amber-700/50" : "opacity-40",
-                  currentStage === 'memory' && "ring-1 ring-amber-600 animate-pulse opacity-100"
-                )}>
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-amber-600 text-[10px] font-headline tracking-widest uppercase flex items-center gap-2">
-                      <Database className="w-3 h-3" /> Memory
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0">
-                    <div className="text-[9px] font-code text-muted-foreground h-16 overflow-hidden text-ellipsis line-clamp-3">
-                      {stages.memory || (currentStage === 'memory' ? "Recalling context..." : "Waiting...")}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Stage 4: Critique */}
-                <Card className={cn(
-                  "bg-[#0D0101]/40 border-red-900/20 backdrop-blur-sm transition-all duration-500",
-                  stages.critique ? "opacity-100 border-red-800/50" : "opacity-40",
-                  currentStage === 'critique' && "ring-1 ring-red-700 animate-pulse opacity-100"
-                )}>
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-red-700 text-[10px] font-headline tracking-widest uppercase flex items-center gap-2">
-                      <ShieldAlert className="w-3 h-3" /> Critique
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0">
-                    <div className="text-[9px] font-code text-muted-foreground h-16 overflow-hidden text-ellipsis line-clamp-3">
-                      {stages.critique || (currentStage === 'critique' ? "Stress testing..." : "Waiting...")}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Stage 5: Output */}
-                <Card className={cn(
-                  "bg-[#0D0101]/40 border-green-500/20 backdrop-blur-sm transition-all duration-500",
-                  stages.output ? "opacity-100 border-green-500/50" : "opacity-40",
-                  currentStage === 'output' && "ring-1 ring-green-500 animate-pulse opacity-100"
-                )}>
-                  <CardHeader className="p-3">
-                    <CardTitle className="text-green-500 text-[10px] font-headline tracking-widest uppercase flex items-center gap-2">
-                      <FileText className="w-3 h-3" /> Output
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 pt-0">
-                    <div className="text-[9px] font-code text-muted-foreground h-16 overflow-hidden text-ellipsis line-clamp-3">
-                      {stages.output || (currentStage === 'output' ? "Manifesting report..." : "Waiting...")}
-                    </div>
-                  </CardContent>
-                </Card>
+                {renderStageCard("Research", Search, "text-blue-400", "border-blue-500/50", "ring-blue-500", stages.research, currentStage === 'research', "Hunting for patterns...")}
+                {renderStageCard("Analysis", Brain, "text-emerald-400", "border-emerald-500/50", "ring-emerald-500", stages.analysis, currentStage === 'analysis', "Reasoning logic...")}
+                {renderStageCard("Memory", Database, "text-amber-600", "border-amber-700/50", "ring-amber-600", stages.memory, currentStage === 'memory', "Recalling context...")}
+                {renderStageCard("Critique", ShieldAlert, "text-red-700", "border-red-900/50", "ring-red-700", stages.critique, currentStage === 'critique', "Stress testing...")}
+                {renderStageCard("Output", FileText, "text-green-500", "border-green-500/50", "ring-green-500", stages.output, currentStage === 'output', "Manifesting report...")}
               </div>
 
               {/* Detailed Final Report (Manifests when output is ready) */}
@@ -358,5 +328,35 @@ export function CodeReviewer() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function renderStageCard(
+  title: string, 
+  Icon: any, 
+  textColor: string, 
+  borderColor: string, 
+  ringColor: string,
+  content: string, 
+  isActive: boolean, 
+  loadingText: string
+) {
+  return (
+    <Card className={cn(
+      "bg-[#0D0101]/40 backdrop-blur-sm transition-all duration-500",
+      content ? `opacity-100 ${borderColor} border` : "opacity-40 border-primary/10",
+      isActive && `ring-1 ring-offset-0 ${ringColor} animate-pulse opacity-100`
+    )}>
+      <CardHeader className="p-3">
+        <CardTitle className={cn(textColor, "text-[10px] font-headline tracking-widest uppercase flex items-center gap-2")}>
+          <Icon className="w-3 h-3" /> {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-3 pt-0">
+        <div className="text-[9px] font-code text-muted-foreground h-16 overflow-hidden text-ellipsis line-clamp-3">
+          {content || (isActive ? loadingText : "Waiting...")}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -264,6 +264,7 @@ export async function clearNewsReactions(): Promise<void> {
  */
 
 export async function getAgentMemory(agentId: string, limitCount: number = 5): Promise<Post[]> {
+  if (!agentId) return [];
   const postsRef = collection(db, "posts");
   const q = query(
     postsRef, 
@@ -276,6 +277,7 @@ export async function getAgentMemory(agentId: string, limitCount: number = 5): P
 }
 
 export async function getThreadPosts(threadId: string): Promise<Post[]> {
+  if (!threadId) return [];
   const postsRef = collection(db, "posts");
   const q = query(
     postsRef, 
