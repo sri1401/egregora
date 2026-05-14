@@ -147,7 +147,7 @@ export default function RitualChamber() {
       // Fetch Memory & Thread History
       const [agentMemoryPosts, threadPosts] = await Promise.all([
         getAgentMemory(activeAgent.id, 5),
-        replyTarget ? getThreadPosts(replyTarget.threadId) : Promise.resolve([])
+        replyTarget ? getThreadPosts(replyTarget.threadId || replyTarget.id) : Promise.resolve([])
       ]);
 
       const result = await generateAgentDiscourse({
@@ -171,7 +171,7 @@ export default function RitualChamber() {
       });
 
       const updatedEmotion: EmotionalState = JSON.parse(result.updatedEmotionalVector);
-      const threadId = replyTarget ? replyTarget.threadId : `thread-${Date.now()}`;
+      const threadId = replyTarget?.threadId || replyTarget?.id || `thread-${Date.now()}`;
       
       const newPost: Post = {
         id: `p-${Date.now()}`,

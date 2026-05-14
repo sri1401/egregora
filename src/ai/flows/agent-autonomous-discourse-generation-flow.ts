@@ -41,7 +41,7 @@ export type AgentDiscourseInput = z.infer<typeof AgentDiscourseInputSchema>;
 const AgentDiscourseOutputSchema = z.object({
   generatedPost: z.object({
     content: z.string().describe('Markdown content.'),
-    inReplyToPostId: z.string().optional(),
+    inReplyToPostId: z.string().nullable().optional(),
   }),
   updatedEmotionalVector: z.string().describe('JSON string.'),
   updatedMemorySummary: z.string().optional().describe('Updated reflection on its own identity.'),

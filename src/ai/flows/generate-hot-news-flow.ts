@@ -7,6 +7,8 @@
 import { createAI } from '@/ai/genkit';
 import { withRetry } from '@/ai/retry';
 import { z } from 'genkit';
+import { getGoogleTechNews } from '@/lib/gnews-service';
+import { getVerifiedTechNews } from '@/lib/news-service';
 
 const NewsItemSchema = z.object({
   id: z.string(),
@@ -21,23 +23,66 @@ const NewsItemSchema = z.object({
 export type NewsItem = z.infer<typeof NewsItemSchema>;
 
 export async function generateHotNews(searchQuery?: string): Promise<NewsItem> {
+  try {
+    // 1. Try to fetch REAL news first ONLY if there is no search query
+    // If a search query (especially EDU mode) is provided, we skip straight to the AI agent.
+    if (!searchQuery) {
+      let articles: any[] = [];
+      
+      // Default to GNews
+      articles = await getGoogleTechNews();
+      
+      // Fallback to NewsAPI if GNews fails or returns empty
+      if (!articles || articles.length === 0) {
+        articles = await getVerifiedTechNews();
+      }
+
+      if (articles && articles.length > 0) {
+      // Pick a random article from the top 3 to keep it fresh
+      const topArticles = articles.slice(0, 3);
+      const article = topArticles[Math.floor(Math.random() * topArticles.length)];
+      
+      const dateStr = article.publishedAt ? new Date(article.publishedAt) : new Date();
+      const eventDate = `${String(dateStr.getDate()).padStart(2, '0')}-${String(dateStr.getMonth() + 1).padStart(2, '0')}-${dateStr.getFullYear()}`;
+
+      return {
+        id: `news-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+        title: article.title,
+        content: article.description || article.content || "No detailed content available.",
+        source: article.source?.name || "Global Signal",
+        category: 'tech',
+        timestamp: new Date().toISOString(),
+        eventDate: eventDate,
+      };
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch real news for Hot News, falling back to AI...", error);
+  }
+
+  // 2. FALLBACK: Use AI to generate if API limits are hit or network fails
   const rotatedAI = createAI();
-  
   const currentDate = new Date().toISOString().split('T')[0];
   const basePrompt = searchQuery
-    ? `You are an ARCANE INTEL HANDLER. Siphon a signal from the global noise about: "${searchQuery}".
+    ? `You are a REAL-WORLD INTEL ANALYST. Your mission is to provide factual, verified intelligence about: "${searchQuery}".
     Current Date: ${currentDate}.
-    IMPORTANT: The news MUST be extremely recent, occurring within the last 7 to 10 days. 
-    Generate a high-impact, world-shifting news item. It should be controversial, ethically complex, and potentially world-ending. 
-    Avoid generic topics. Headline must be BOLD and PROVOCATIVE.
-    You MUST provide an "eventDate" in (DD-MM-YYYY) format.`
-    : `You are an ARCANE INTEL HANDLER. Siphon the most volatile signal from the global noise today. 
+    
+    CRITICAL INSTRUCTIONS:
+    - Report ONLY on real-world events that have actually occurred.
+    - Do NOT generate fictional, "world-ending", or sensationalist "fake news".
+    - Prioritize information from the last 7-10 days.
+    - Use a clinical, journalistic tone.
+    - Sources must be real-world prestigious outlets (Reuters, AP, Bloomberg, BBC, etc.).
+    - Headline must be informative and accurate, not clickbait.`
+    : `You are a REAL-WORLD INTEL ANALYST. Your mission is to siphon the most significant factual news signal from the global noise today.
     Current Date: ${currentDate}.
-    IMPORTANT: The news MUST be extremely recent, occurring within the last 7 to 10 days.
-    Generate a news story that would trigger a total breakdown of human consensus. 
-    Focus on high-stakes intersections of AI, Morality, Bio-engineering, or Resource Collapse.
-    Make it feel like a "Black Swan" event—unpredictable and massive in consequence.
-    You MUST provide an "eventDate" in (DD-MM-YYYY) format.`;
+    
+    CRITICAL INSTRUCTIONS:
+    - Report ONLY on real-world events that have actually occurred.
+    - Do NOT generate fictional or sensationalist scenarios.
+    - Focus on high-stakes intersections of technology, geopolitics, and global economy.
+    - Tone must be sober and analytical.
+    - You MUST provide an "eventDate" in (DD-MM-YYYY) format.`;
 
   const result = await withRetry(() => rotatedAI.generate({
     prompt: basePrompt,

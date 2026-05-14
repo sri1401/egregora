@@ -21,11 +21,35 @@ interface NewsDebateProps {
 
 export function NewsDebate({ newsList, reactions, agents, onAgentClick, isLoading, onRefreshNews, isArchive, onBack }: NewsDebateProps) {
   const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(180); // 3 minutes
   const { playSfx } = useSound();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!mounted || isLoading) return;
+
+    if (timeLeft <= 0) {
+      playSfx('zap');
+      onRefreshNews(true);
+      setTimeLeft(180);
+      return;
+    }
+
+    const timerId = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [timeLeft, isLoading, mounted, onRefreshNews, playSfx]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   if (isLoading && newsList.length === 0) {
     return (
@@ -49,7 +73,7 @@ export function NewsDebate({ newsList, reactions, agents, onAgentClick, isLoadin
           The global news feed is currently empty. Try refreshing the signal.
         </p>
         <button 
-          onClick={() => { playSfx('zap'); onRefreshNews(); }}
+          onClick={() => { playSfx('zap'); onRefreshNews(); setTimeLeft(180); }}
           onMouseEnter={() => playSfx('glitch')}
           className="mt-8 px-6 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-md transition-all"
         >
@@ -79,18 +103,24 @@ export function NewsDebate({ newsList, reactions, agents, onAgentClick, isLoadin
             </>
           )}
         </div>
-        <button 
-          onClick={() => { playSfx('zap'); onRefreshNews(true); }}
-          onMouseEnter={() => playSfx('glitch')}
-          disabled={isLoading}
-          className={cn(
-            "group flex items-center gap-2.5 px-4 py-2 bg-muted/50 hover:bg-muted text-foreground border border-border rounded-md transition-all text-xs font-semibold shadow-sm",
-            isLoading && "opacity-50 cursor-not-allowed bg-primary/20"
-          )}
-        >
-          <Zap className={cn("w-4 h-4 text-primary", isLoading && "animate-spin")} />
-          <span>{isLoading ? "Fetching..." : "Refresh Feed"}</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="text-xs font-mono text-primary bg-primary/10 px-3 py-1.5 rounded-md border border-primary/20 flex items-center gap-2">
+            <Activity className="w-3.5 h-3.5 animate-pulse" />
+            <span>Auto-refresh in {formatTime(timeLeft)}</span>
+          </div>
+          <button 
+            onClick={() => { playSfx('zap'); onRefreshNews(true); setTimeLeft(180); }}
+            onMouseEnter={() => playSfx('glitch')}
+            disabled={isLoading}
+            className={cn(
+              "group flex items-center gap-2.5 px-4 py-2 bg-muted/50 hover:bg-muted text-foreground border border-border rounded-md transition-all text-xs font-semibold shadow-sm",
+              isLoading && "opacity-50 cursor-not-allowed bg-primary/20"
+            )}
+          >
+            <Zap className={cn("w-4 h-4 text-primary", isLoading && "animate-spin")} />
+            <span>{isLoading ? "Fetching..." : "Refresh Feed"}</span>
+          </button>
+        </div>
       </div>
 
       {/* News Feed - Multiple Cards */}

@@ -1,7 +1,7 @@
 "use client";
 
 import { NewsItem, Agent } from "@/lib/types";
-import { Search, Flame, Globe, Skull, Loader2, Sparkles, Clock, Tag, RefreshCw } from "lucide-react";
+import { Search, Flame, Globe, Skull, Loader2, Sparkles, Clock, Tag, RefreshCw, GraduationCap } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -16,6 +16,7 @@ interface SearchResultsProps {
 export function SearchResults({ searchQuery, searchResults, isSearching, onSearchAgain }: SearchResultsProps) {
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [mounted, setMounted] = useState(false);
+  const [eduMode, setEduMode] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -28,7 +29,11 @@ export function SearchResults({ searchQuery, searchResults, isSearching, onSearc
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (localQuery.trim() && !isSearching) {
-      onSearchAgain(localQuery.trim());
+      let finalQuery = localQuery.trim();
+      if (eduMode) {
+        finalQuery = `What is ${finalQuery} and how does it work?`;
+      }
+      onSearchAgain(finalQuery);
     }
   };
 
@@ -53,13 +58,29 @@ export function SearchResults({ searchQuery, searchResults, isSearching, onSearc
           </div>
 
           {/* Search Input */}
-          <form onSubmit={handleSearch} className="flex gap-3">
-            <div className="relative flex-1">
-              {isSearching ? (
-                <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
-              ) : (
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
-              )}
+          <form onSubmit={handleSearch} className="flex flex-col gap-3">
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setEduMode(!eduMode)}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 text-[10px] font-headline uppercase tracking-widest font-bold border transition-all duration-300 rounded-sm",
+                  eduMode 
+                    ? "bg-primary/20 text-primary border-primary shadow-[0_0_10px_rgba(220,38,38,0.2)]" 
+                    : "bg-black/40 text-muted-foreground/60 border-primary/10 hover:border-primary/40 hover:text-primary/80"
+                )}
+              >
+                <GraduationCap className="w-3.5 h-3.5" />
+                EDU Mode {eduMode ? "ON" : "OFF"}
+              </button>
+            </div>
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                {isSearching ? (
+                  <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />
+                ) : (
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40" />
+                )}
               <input
                 type="text"
                 value={localQuery}
@@ -97,6 +118,7 @@ export function SearchResults({ searchQuery, searchResults, isSearching, onSearc
                 </>
               )}
             </button>
+            </div>
           </form>
         </div>
       </div>

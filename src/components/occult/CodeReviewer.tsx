@@ -205,20 +205,20 @@ export function CodeReviewer() {
             </CardContent>
             <div className="p-4 border-t border-primary/20 bg-primary/5 flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex flex-wrap gap-3">
-                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'research' ? "text-blue-400 animate-pulse" : "text-muted-foreground")}>
-                  <Search className="w-3 h-3" /> RESEARCH
+                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'research' ? "text-blue-400 animate-pulse" : stages.research ? "text-green-500 font-bold" : "text-muted-foreground")}>
+                  {stages.research ? <ShieldCheck className="w-3 h-3" /> : <Search className="w-3 h-3" />} RESEARCH
                 </div>
-                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'analysis' ? "text-emerald-400 animate-pulse" : "text-muted-foreground")}>
-                  <Brain className="w-3 h-3" /> ANALYSIS
+                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'analysis' ? "text-emerald-400 animate-pulse" : stages.analysis ? "text-green-500 font-bold" : "text-muted-foreground")}>
+                  {stages.analysis ? <ShieldCheck className="w-3 h-3" /> : <Brain className="w-3 h-3" />} ANALYSIS
                 </div>
-                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'memory' ? "text-amber-600 animate-pulse" : "text-muted-foreground")}>
-                  <Database className="w-3 h-3" /> MEMORY
+                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'memory' ? "text-amber-600 animate-pulse" : stages.memory ? "text-green-500 font-bold" : "text-muted-foreground")}>
+                  {stages.memory ? <ShieldCheck className="w-3 h-3" /> : <Database className="w-3 h-3" />} MEMORY
                 </div>
-                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'critique' ? "text-red-700 animate-pulse" : "text-muted-foreground")}>
-                  <ShieldAlert className="w-3 h-3" /> CRITIQUE
+                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'critique' ? "text-red-700 animate-pulse" : stages.critique ? "text-green-500 font-bold" : "text-muted-foreground")}>
+                  {stages.critique ? <ShieldCheck className="w-3 h-3" /> : <ShieldAlert className="w-3 h-3" />} CRITIQUE
                 </div>
-                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'output' ? "text-green-500 animate-pulse" : "text-muted-foreground")}>
-                  <FileText className="w-3 h-3" /> OUTPUT
+                <div className={cn("flex items-center gap-2 text-[9px] font-code transition-all", currentStage === 'output' ? "text-green-500 animate-pulse" : stages.output ? "text-green-500 font-bold" : "text-muted-foreground")}>
+                  {stages.output ? <ShieldCheck className="w-3 h-3" /> : <FileText className="w-3 h-3" />} OUTPUT
                 </div>
               </div>
               <Button 
@@ -264,6 +264,59 @@ export function CodeReviewer() {
                   <CardContent className="p-8">
                     <div className="prose prose-invert prose-xs max-w-none font-body leading-relaxed text-foreground/90 whitespace-pre-wrap selection:bg-primary/30">
                       {stages.output}
+                    </div>
+
+                    <div className="mt-12 pt-8 border-t border-primary/20">
+                      <h4 className="text-primary text-sm font-headline uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <Database className="w-4 h-4" /> Cognitive Process Breakdown
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-blue-400">
+                            <Search className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-widest">1. Research</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed font-code">
+                            Scanned raw code to identify patterns, libraries, and architectural standards.
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-emerald-400">
+                            <Brain className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-widest">2. Analysis</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed font-code">
+                            Deconstructed control flow and logic integrity, hunting for structural bugs and redundant operations.
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-amber-600">
+                            <Database className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-widest">3. Memory</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed font-code">
+                            Contextualized logic against idealized historical patterns and high-performance system pitfalls.
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-red-500">
+                            <ShieldAlert className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-widest">4. Critique</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed font-code">
+                            Red-team stress test executing security vulnerability checks, edge-case mapping, and failure simulation.
+                          </p>
+                        </div>
+                        <div className="space-y-2 lg:col-span-2">
+                          <div className="flex items-center gap-2 text-green-500">
+                            <FileText className="w-4 h-4" />
+                            <span className="text-xs font-bold uppercase tracking-widest">5. Synthesis</span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed font-code">
+                            Aggregated all prior cognitive layers into this finalized, professional architectural review.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -349,7 +402,7 @@ function renderStageCard(
     )}>
       <CardHeader className="p-3">
         <CardTitle className={cn(textColor, "text-[10px] font-headline tracking-widest uppercase flex items-center gap-2")}>
-          <Icon className="w-3 h-3" /> {title}
+          {content && !isActive ? <ShieldCheck className="w-3 h-3 text-green-500" /> : <Icon className="w-3 h-3" />} {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 pt-0">
